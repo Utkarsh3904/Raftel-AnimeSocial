@@ -3,7 +3,8 @@ import connectDB from "@/lib/db"
 import User from "@/models/User"
 
 export async function POST(req) {
-
+  console.log("🔔 WEBHOOK HIT")
+  console.log("🔑 SECRET:", process.env.WEBHOOK_SECRET ? "exists" : "MISSING")
   const webhookSecret = process.env.WEBHOOK_SECRET
   if (!webhookSecret) return new Response("No webhook secret", { status: 500 })
 
