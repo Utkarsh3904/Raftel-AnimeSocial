@@ -13,10 +13,8 @@ const avatars = [
     "https://i.pinimg.com/1200x/b1/93/fc/b193fc52d2119961be46b9f85864652a.jpg",
     "https://i.pinimg.com/736x/6d/38/3d/6d383daf94172f3ceecb807a43711563.jpg",
     "https://i.pinimg.com/736x/b2/5c/3d/b25c3d58856f0752cba3464e70700d5b.jpg",
-    "https://i.pinimg.com/736x/b2/5c/3d/b25c3d58856f0752cba3464e70700d5b.jpg",
     "https://i.pinimg.com/736x/5c/a3/0f/5ca30f01e6501ed198f2518a6752c53a.jpg",
     "https://i.pinimg.com/1200x/3e/81/38/3e8138af385deaa3cb0a8b6fac489bdc.jpg",
-    "https://i.pinimg.com/1200x/a6/46/51/a64651c78000e937423fb96c6d15daea.jpg"
 ]
 
 export default avatars;
