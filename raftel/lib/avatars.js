@@ -17,4 +17,5 @@ const avatars = [
     "https://i.pinimg.com/1200x/3e/81/38/3e8138af385deaa3cb0a8b6fac489bdc.jpg",
 ]
 
+
 export default avatars;
