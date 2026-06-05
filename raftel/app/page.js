@@ -7,6 +7,7 @@ import Sidebar from "@/components/Sidebar"
 import PollCard from "@/components/PollCard"
 
 export default async function FeedPage() {
+  
   const { userId } = auth()
   await connectDB()
 
