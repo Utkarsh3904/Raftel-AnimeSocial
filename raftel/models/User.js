@@ -1,13 +1,13 @@
 import mongoose from 'mongoose'
 
-const animeSchema = new mongoose.Schema({
+// const animeSchema = new mongoose.Schema({
 
-    anilistId : {type: Number, required: true, unique: true},
-    title : {type: String, required: true},
-    coverImage: {type: String},
-    genres: [String],
-    addedAt: {type: Date, default: Date.now}
-})
+//     anilistId : {type: Number, required: true, unique: true},
+//     title : {type: String, required: true},
+//     coverImage: {type: String},
+//     genres: [String],
+//     addedAt: {type: Date, default: Date.now}
+// }) might not needed
 
 const UserSchema = new mongoose.Schema({
     clerkId: {type: String, required:true, unique: true},
