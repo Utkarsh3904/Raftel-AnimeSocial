@@ -2,49 +2,45 @@ import connectDB from "@/lib/db"
 import Comment from "@/models/Comment"
 import User from "@/models/User"
 import { auth } from "@clerk/nextjs/server"
+import { checkRateLimit } from "@/lib/rateLimit"
 
 export async function POST(req, { params }) {
-    const { userId } = await auth();
+  const rateCheck = checkRateLimit(req, 30, 60000)
+  if (!rateCheck.allowed) {
+    return Response.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": rateCheck.retryAfter } })
+  }
 
-    if (!userId) return Response.json({ error: "Unauthorized" }, { status: 401 });
+  const { userId: clerkId } = await auth()
+  if (!clerkId) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
-    const commentId = params.id;
+  const { id: commentId } = await params
+  if (!commentId) return Response.json({ error: "Comment ID is required" }, { status: 400 })
 
-    if (!commentId) return Response.json({ error: "Comment ID is required" }, { status: 400 });
+  await connectDB()
 
-    await connectDB();
+  const user = await User.findOne({ clerkId })
+  if (!user) return Response.json({ error: "User not found" }, { status: 404 })
 
-    const comment = await Comment.findById(commentId);
+  const comment = await Comment.findById(commentId)
+  if (!comment) return Response.json({ error: "Comment not found" }, { status: 404 })
 
-    if (!comment) return Response.json({ error: "Comment not found" }, { status: 404 });
+  const alreadyLiked = comment.likedBy.some((id) => id.toString() === user._id.toString())
+  if (alreadyLiked) {
+    return Response.json({ error: "Already liked" }, { status: 400 })
+  }
 
-    if (comment.likedBy.includes(userId)) {
-        return Response.json({ error: "Already liked" }, { status: 400 });
-    }
+  if (comment.userId.toString() === user._id.toString()) {
+    return Response.json({ error: "Cannot like your own comment" }, { status: 400 })
+  }
 
-    if (comment.userId.toString() === userId) {
-        return Response.json({ error: "Cannot like your own comment" }, { status: 400 });
-    }
+  await Comment.findByIdAndUpdate(commentId, {
+    $inc: { likes: 1 },
+    $push: { likedBy: user._id }
+  })
 
-    // ✅ Bug 1 & 2 Fixed: use commentId (not newComment._id) and combine both updates atomically
-    await Comment.findByIdAndUpdate(
-        commentId,
-        {
-            $inc: { likes: 1 },
-            $push: { likedBy: userId }
-        }
-    );
+  await User.findByIdAndUpdate(comment.userId, { $inc: { reputation: 1 } })
 
-    // ✅ Bug 3 Fixed: actually increment the comment author's reputation
-    await User.findByIdAndUpdate(
-        comment.userId,
-        { $inc: { reputation: 1 } }
-    );
+  const populated = await Comment.findById(commentId).populate("userId", "username avatar")
 
-    // ✅ Bug 4 Fixed: capture the populated result and return it
-    const populated = await Comment.findById(commentId)
-        .populate("userId", "username avatar");
-
-    // ✅ Bug 5 Fixed: accurate success message
-    return Response.json({ comment: populated, message: "Comment liked" }, { status: 200 });
+  return Response.json({ comment: populated, message: "Comment liked" }, { status: 200 })
 }
