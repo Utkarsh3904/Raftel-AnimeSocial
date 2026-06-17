@@ -12,21 +12,46 @@ if (!cached) {
   cached = global.mongoose = {
     conn: null,
     promise: null,
+    indexesSynced: false,
   };
+}
+
+async function syncUserIndexes() {
+  if (cached.indexesSynced) return;
+
+  try {
+    const collection = mongoose.connection.collection("users");
+    const indexes = await collection.indexes();
+
+    for (const index of indexes) {
+      if (index.key?.clearkId) {
+        await collection.dropIndex(index.name);
+        console.log(`Dropped stale index: ${index.name}`);
+      }
+    }
+
+    const User = (await import("@/models/User")).default;
+    await User.syncIndexes();
+    cached.indexesSynced = true;
+  } catch (error) {
+    console.warn("User index sync skipped:", error.message);
+  }
 }
 
 async function connectDB() {
   if (cached.conn) {
     console.log("Using existing MongoDB connection");
+    await syncUserIndexes();
     return cached.conn;
   }
 
   if (!cached.promise) {
     cached.promise = mongoose
       .connect(MONGODB_URI)
-      .then((mongoose) => {
+      .then(async (mongooseInstance) => {
         console.log("MongoDB Connected Successfully");
-        return mongoose;
+        await syncUserIndexes();
+        return mongooseInstance;
       })
       .catch((error) => {
         console.log("MongoDB Connection Failed:", error);

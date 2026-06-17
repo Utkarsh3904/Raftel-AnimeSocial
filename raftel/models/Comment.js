@@ -2,15 +2,15 @@ import mongoose from 'mongoose';
 
 const CommentSchema = new mongoose.Schema({
 
-    pollId :{
-        type: mongoose.Schema.types.ObjectId,
+    pollId: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Poll',
-        required: true
+        required: true,
     },
-    userId : {
-        type : mongoose.Schema.types.ObjectId,
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
+        required: true,
     },
     text: {
         type: String,
