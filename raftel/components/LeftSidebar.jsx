@@ -15,7 +15,7 @@ function LeftSidebar({ user }) {
   ]
 
   return (
-    <aside className="hidden w-64 shrink-0 lg:sticky lg:top-20 lg:block lg:self-start lg:h-[calc(100dvh-5rem)]">
+    <aside className="hidden w-60 shrink-0 lg:sticky lg:top-20 lg:block lg:self-start lg:h-[calc(100dvh-5rem)]">
       <div className="flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-zinc-950/60 p-5 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur-xl">
         <div className="flex-1 min-h-0 pr-1 space-y-6 overflow-x-hidden overflow-y-auto">
           <nav>
