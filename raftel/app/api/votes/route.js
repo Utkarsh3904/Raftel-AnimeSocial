@@ -3,30 +3,37 @@ import Vote from "@/models/Vote"
 import Poll from "@/models/Poll"
 import User from "@/models/User"
 import { auth } from "@clerk/nextjs/server"
+import { checkRateLimit } from "@/lib/rateLimit"
 
 export async function POST(req) {
+  const rateCheck = checkRateLimit(req, 30, 60000)
+  if (!rateCheck.allowed) {
+    return Response.json({ error: "Too many requests" }, { status: 429, headers: { "Retry-After": rateCheck.retryAfter } })
+  }
+
   try {
     const { userId: clerkId } = await auth()
     if (!clerkId) return Response.json({ error: "Unauthorized" }, { status: 401 })
 
     const { pollId, optionIndex } = await req.json()
 
-    // ✅ Validate required fields early
     if (pollId === undefined || optionIndex === undefined) {
       return Response.json({ error: "pollId and optionIndex are required" }, { status: 400 })
     }
 
     await connectDB()
 
-    const [user, poll] = await Promise.all([       // ✅ Fetch user & poll in parallel
+    const [user, poll] = await Promise.all([
       User.findOne({ clerkId }),
       Poll.findById(pollId)
     ])
 
     if (!user) return Response.json({ error: "User not found" }, { status: 404 })
     if (!poll) return Response.json({ error: "Poll not found" }, { status: 404 })
+    if (poll.type === "discussion") {
+      return Response.json({ error: "Cannot vote on a discussion" }, { status: 400 })
+    }
 
-    // ✅ Validate optionIndex is within bounds
     if (optionIndex < 0 || optionIndex >= poll.options.length) {
       return Response.json({ error: "Invalid option index" }, { status: 400 })
     }
@@ -36,7 +43,6 @@ export async function POST(req) {
       return Response.json({ error: "Already voted" }, { status: 400 })
     }
 
-    // ✅ Save vote and update poll in parallel
     const [updatedPoll] = await Promise.all([
       Poll.findByIdAndUpdate(
         poll._id,
@@ -46,7 +52,6 @@ export async function POST(req) {
       new Vote({ userId: user._id, pollId, optionIndex }).save()
     ])
 
-    // ✅ Reputation update with error isolation (don't fail the request if this fails)
     if (updatedPoll.createdBy) {
       User.findByIdAndUpdate(
         updatedPoll.createdBy._id,
