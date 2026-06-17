@@ -16,10 +16,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${poppins.className} h-screen flex flex-col bg-black text-white antialiased `}>
+      <body className={`${poppins.className} h-screen flex flex-col antialiased`}>
         <ClerkProvider>
           {children}
-          <Toaster theme="dark" />
+          <Toaster />
         </ClerkProvider>
       </body>
     </html>
