@@ -6,21 +6,21 @@ import Image from "next/image";
 export default function LandingPage() {
   return (
     <div
-      className="relative min-h-screen w-full bg-cover bg-center bg-no-repeat"
+      className="relative w-full min-h-screen bg-center bg-no-repeat bg-cover"
       style={{
         backgroundImage: "url('/finallandingpage.png')",
       }}
     >
       <div className="absolute inset-0 bg-black/10" />
 
-      <div className="relative z-10 flex min-h-screen flex-col">
+      <div className="relative z-10 flex flex-col min-h-screen">
         <header className="flex items-center justify-between px-8 pt-8 sm:px-12 sm:pt-10">
           <Image
-            src="/raftel-icon.png"
+            src="/darksailboat.png"
             alt="Raftel"
             width={48}
             height={48}
-            className="h-12 w-12 rounded-xl object-cover"
+            className="object-cover h-12 ml-4 w-12m rounded-xl"
           />
           <div className="flex items-center gap-4">
             <SignUpButton mode="modal">
@@ -36,7 +36,7 @@ export default function LandingPage() {
           </div>
         </header>
 
-        <main className="flex flex-1 items-center sm:pl-16 sm:mb-80">
+        <main className="flex items-center flex-1 sm:pl-16 sm:mb-80">
           <div className="max-w-lg">
             <h1 className="text-6xl font-extrabold tracking-tight text-black sm:text-7xl md:text-8xl">
               Raftel

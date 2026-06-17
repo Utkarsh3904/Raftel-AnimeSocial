@@ -78,7 +78,7 @@ export default function ProfileContent({ profileUser, currentUser, isOwner, init
             <div className="flex items-center gap-4 mt-3 text-xs text-zinc-500">
               <span>{profileUser.reputation} Reputation</span>
               <span className="w-1 h-1 rounded-full bg-white/15" />
-              <span>Joined {timeAgo(profileUser.createdAt)}</span>
+              <span>Age {timeAgo(profileUser.createdAt).replace(/\s*ago$/i, "")}</span>
             </div>
           </div>
 
