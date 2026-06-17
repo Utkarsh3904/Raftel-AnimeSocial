@@ -1,41 +1,23 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { timeAgo } from "@/lib/timeago"
 
-function PollCard({ poll }) {
+function DiscussionCard({ post }) {
   const router = useRouter()
-  const [voted, setVoted] = useState(false)
-  const [selectedOption, setSelectedOption] = useState(null)
-  const [options, setOptions] = useState(poll.options || [])
-  const [upvotes, setUpvotes] = useState(poll.upvotes || 0)
-  const [votedUp, setVotedUp] = useState(poll.userVote === "up")
+  const [commentCount, setCommentCount] = useState(post.commentCount || 0)
+  const [upvotes, setUpvotes] = useState(post.upvotes || 0)
+  const [votedUp, setVotedUp] = useState(post.userVote === "up")
 
-  const totalVotes = options.reduce((sum, opt) => sum + opt.votes, 0)
-
-  const handleVote = async (optionIndex) => {
-    if (voted) return
-    try {
-      const res = await fetch("/api/votes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pollId: poll._id, optionIndex }),
-      })
-      if (res.ok) {
-        const updated = options.map((opt, i) =>
-          i === optionIndex ? { ...opt, votes: opt.votes + 1 } : opt
-        )
-        setOptions(updated)
-        setSelectedOption(optionIndex)
-        setVoted(true)
-      }
-    } catch (error) {
-      console.error("Error voting:", error)
-    }
-  }
+  useEffect(() => {
+    fetch(`/api/comments?pollId=${post._id}`)
+      .then((res) => res.json())
+      .then((data) => setCommentCount(Array.isArray(data) ? data.length : 0))
+      .catch(() => {})
+  }, [post._id])
 
   const handleUpvote = async (e) => {
     e.stopPropagation()
@@ -44,7 +26,7 @@ function PollCard({ poll }) {
     setVotedUp(!votedUp)
     setUpvotes((n) => (prev ? n - 1 : n + 1))
     try {
-      const res = await fetch(`/api/posts/${poll._id}/vote`, {
+      const res = await fetch(`/api/posts/${post._id}/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ voteType: newState }),
@@ -59,7 +41,7 @@ function PollCard({ poll }) {
 
   const handleCardClick = (e) => {
     if (e.target.closest("button") || e.target.closest("a")) return
-    router.push(`/post/${poll._id}`)
+    router.push(`/post/${post._id}`)
   }
 
   return (
@@ -68,7 +50,7 @@ function PollCard({ poll }) {
       className="rounded-3xl border border-white/10 bg-zinc-950/60 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur-xl cursor-pointer hover:border-white/20 transition p-5"
     >
       <div className="flex items-center gap-2.5 text-xs text-zinc-500">
-        {poll.isAiGenerated ? (
+        {post.isAiGenerated ? (
           <div className="flex items-center gap-2">
             <Image
               src="/vegapunk.jpg"
@@ -83,35 +65,43 @@ function PollCard({ poll }) {
         ) : (
           <>
             <Link
-              href={`/profile/${poll.createdBy?.username}`}
+              href={`/profile/${post.createdBy?.username}`}
               onClick={(e) => e.stopPropagation()}
               className="flex items-center gap-1.5 hover:text-zinc-300 transition"
             >
               <Image
-                src={poll.createdBy?.avatar}
-                alt={poll.createdBy?.username}
+                src={post.createdBy?.avatar}
+                alt={post.createdBy?.username}
                 width={32}
                 height={32}
                 className="h-8 w-8 rounded-xl object-cover ring-1 ring-white/10"
               />
-              <span className="font-medium text-zinc-300">{poll.createdBy?.username}</span>
+              <span className="font-medium text-zinc-300">{post.createdBy?.username}</span>
             </Link>
             <span className="text-zinc-600">·</span>
           </>
         )}
-        <span>{timeAgo(poll.createdAt)}</span>
-        <span className="rounded-full border border-orange-500/30 bg-orange-500/10 px-2 py-0.5 text-[10px] font-semibold text-orange-400 ml-auto">
-          Poll
+        <span>{timeAgo(post.createdAt)}</span>
+        <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[10px] font-semibold text-blue-400 ml-auto">
+          Discussion
         </span>
       </div>
 
-      <h2 className="mt-3 text-base font-semibold text-white leading-snug">{poll.question}</h2>
+      <h2 className="mt-3 text-base font-semibold text-white leading-snug">
+        {post.question || post.body?.slice(0, 120)}
+      </h2>
 
-      {poll.image && (
+      {post.body && (
+        <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-zinc-300">
+          {post.body.length > 300 ? post.body.slice(0, 300) + "..." : post.body}
+        </p>
+      )}
+
+      {post.image && (
         <div className="mt-3 w-full max-h-96 rounded-2xl border border-white/10 bg-black/30 flex items-center justify-center overflow-hidden">
           <Image
-            src={poll.image}
-            alt="poll"
+            src={post.image}
+            alt="discussion"
             width={800}
             height={450}
             loading="lazy"
@@ -120,38 +110,7 @@ function PollCard({ poll }) {
         </div>
       )}
 
-      <div className="mt-3 flex flex-col gap-1.5">
-        {(options || []).map((option, index) => {
-          const percentage = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0
-          const isSelected = selectedOption === index
-
-          return voted ? (
-            <div key={index} className="relative w-full rounded-xl overflow-hidden border border-white/10 h-9 bg-white/5">
-              <div
-                className={`absolute left-0 top-0 h-full transition-all duration-500 ${isSelected ? "bg-orange-500/30" : "bg-white/5"}`}
-                style={{ width: `${percentage}%` }}
-              />
-              <div className="absolute inset-0 flex items-center justify-between px-3">
-                <span className="text-xs font-medium text-white">{option.text}</span>
-                <span className={`text-xs font-bold ${isSelected ? "text-orange-400" : "text-zinc-400"}`}>
-                  {percentage.toFixed(1)}%
-                </span>
-              </div>
-            </div>
-          ) : (
-            <button
-              key={index}
-              onClick={(e) => { e.stopPropagation(); handleVote(index) }}
-              className="w-full text-left px-3 py-2 rounded-xl border border-white/10 bg-white/5 text-xs text-zinc-200 hover:border-orange-500/40 hover:bg-white/10 transition"
-            >
-              {option.text}
-            </button>
-          )
-        })}
-      </div>
-
       <div className="mt-3 flex items-center gap-4 text-[11px] text-zinc-500">
-        <span>{totalVotes.toLocaleString()} votes</span>
         <button
           onClick={handleUpvote}
           className="flex items-center gap-1 hover:text-orange-400 transition"
@@ -166,18 +125,18 @@ function PollCard({ poll }) {
           {upvotes > 0 && <span className={votedUp ? "text-orange-400" : ""}>{upvotes}</span>}
         </button>
         <Link
-          href={`/post/${poll._id}`}
+          href={`/post/${post._id}`}
           onClick={(e) => e.stopPropagation()}
           className="flex items-center gap-1 hover:text-zinc-300 transition"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
           </svg>
-          Comment
+          {commentCount > 0 ? `${commentCount} Comments` : "Comment"}
         </Link>
       </div>
     </div>
   )
 }
 
-export default React.memo(PollCard)
+export default React.memo(DiscussionCard)
