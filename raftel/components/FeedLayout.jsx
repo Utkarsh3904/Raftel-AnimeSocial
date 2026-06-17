@@ -5,18 +5,6 @@ import RightSidebar from "@/components/RightSidebar"
 export default function FeedLayout({ user, title, subtitle, children, hideRightSidebar }) {
   return (
     <main className="min-h-screen bg-black text-white">
-      <div className="pointer-events-none fixed inset-0 -z-10">
-        <div className="absolute -top-32 -left-32 h-[520px] w-[520px] rounded-full bg-orange-600/15 blur-[120px]" />
-        <div className="absolute top-24 -right-36 h-[460px] w-[460px] rounded-full bg-white/6 blur-[120px]" />
-        <div
-          className="absolute inset-0 opacity-[0.08]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,0.45) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.45) 1px, transparent 1px)",
-            backgroundSize: "56px 56px",
-          }}
-        />
-      </div>
 
       <Navbar user={user} />
 
