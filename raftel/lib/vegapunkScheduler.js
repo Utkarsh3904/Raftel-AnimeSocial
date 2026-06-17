@@ -1,7 +1,7 @@
 import connectDB from "@/lib/db"
 import Poll from "@/models/Poll"
 
-const INTERVAL_MS = 2 * 60 * 60 * 1000
+const INTERVAL_MS = 12 * 60 * 60 * 1000
 
 export async function shouldGeneratePoll() {
   await connectDB()
