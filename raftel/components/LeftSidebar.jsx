@@ -47,7 +47,7 @@ function LeftSidebar({ user }) {
 
         <Link
           href="/create"
-          className="mt-5 flex w-full shrink-0 items-center justify-center gap-2 rounded-2xl bg-orange-500 px-4 py-3 text-sm font-bold text-black shadow-[0_0_24px_rgba(249,115,22,0.25)] transition hover:bg-orange-400"
+          className="flex items-center justify-center w-full gap-2 px-4 py-3 mt-5 text-sm font-bold text-black transition bg-orange-500 shrink-0 rounded-2xl hover:bg-orange-400"
         >
           <span className="text-lg leading-none">+</span> Create Post
         </Link>

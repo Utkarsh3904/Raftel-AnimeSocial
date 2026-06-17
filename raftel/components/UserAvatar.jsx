@@ -53,7 +53,7 @@ function UserAvatar({ user }) {
           </Link>
           <button
             type="button"
-            onClick={() => signOut({ redirectUrl: "/sign-in" })}
+            onClick={() => signOut({ redirectUrl: "/" })}
             className="w-full text-left px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-800 hover:text-white transition"
           >
             Sign out
