@@ -91,7 +91,7 @@ function DiscussionCard({ post }) {
         {post.question || post.body?.slice(0, 120)}
       </h2>
 
-      {post.body && (
+      {post.body && post.body.length > (post.question?.length || 0) + 10 && (
         <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-zinc-300">
           {post.body.length > 300 ? post.body.slice(0, 300) + "..." : post.body}
         </p>
